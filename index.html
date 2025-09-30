@@ -1,0 +1,89 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RSA Encryption/Decryption</title>
+  <script src="https://cdn.jsdelivr.net/npm/node-forge@1.3.1/dist/forge.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f4f4f4;
+    }
+    h1 {
+      color: #333;
+    }
+    textarea, input, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1em;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>RSA Encryption/Decryption Tool</h1>
+
+  <div class="section">
+    <button onclick="generateKeys()">🔑 Generate RSA Keys</button>
+    <textarea id="publicKey" placeholder="Public Key"></textarea>
+    <textarea id="privateKey" placeholder="Private Key"></textarea>
+  </div>
+
+  <div class="section">
+    <textarea id="plainText" placeholder="Enter text to encrypt"></textarea>
+    <button onclick="encrypt()">🔐 Encrypt</button>
+    <textarea id="cipherText" placeholder="Encrypted text"></textarea>
+  </div>
+
+  <div class="section">
+    <textarea id="cipherInput" placeholder="Enter encrypted text to decrypt"></textarea>
+    <button onclick="decrypt()">🔓 Decrypt</button>
+    <textarea id="decryptedText" placeholder="Decrypted text"></textarea>
+  </div>
+
+  <script>
+    let rsa = forge.pki.rsa;
+
+    function generateKeys() {
+      rsa.generateKeyPair({bits: 2048, workers: 2}, function(err, keypair) {
+        document.getElementById('publicKey').value = forge.pki.publicKeyToPem(keypair.publicKey);
+        document.getElementById('privateKey').value = forge.pki.privateKeyToPem(keypair.privateKey);
+      });
+    }
+
+    function encrypt() {
+      let publicKeyPem = document.getElementById('publicKey').value;
+      let publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
+      let plainText = document.getElementById('plainText').value;
+      let encrypted = publicKey.encrypt(plainText, 'RSA-OAEP');
+      document.getElementById('cipherText').value = forge.util.encode64(encrypted);
+    }
+
+    function decrypt() {
+      let privateKeyPem = document.getElementById('privateKey').value;
+      let privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
+      let cipherText = forge.util.decode64(document.getElementById('cipherInput').value);
+      let decrypted = privateKey.decrypt(cipherText, 'RSA-OAEP');
+      document.getElementById('decryptedText').value = decrypted;
+    }
+  </script>
+
+</body>
+</html>
